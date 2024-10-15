@@ -33,25 +33,29 @@ class Summoner:
         self._name = name
 
 def main():
-#1 fetch puuid
+#1 Fetch puuid
     summoner = Summoner(input("Summoner name: "), input("Tag: #"))
     puuid = get_puuid(summoner.name, summoner.tag)
     #print(puuid)
 
-#2 fetch id from puuid
+#2 Fetch id from puuid
     id = get_id(puuid)
 
-#3 fetch stats
+#3 Fetch players stats
     playerstats = player_ranked_stats(id)
 
-#4 fetch last matches
+#4 Fetch last matches
     lastmatches= get_player_last_matches(puuid)
     #print(lastmatches)
 
-#5 & 6 Print player stats and match history
+#5 Print player stats
     print_player_stats(playerstats)
+
+#6 Print match history
     print_match_history(lastmatches, puuid)
 
+#Functions
+#1 Fetch puuid
 def get_puuid(name, tag):
     try:
         api_url = "https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/"
@@ -60,11 +64,12 @@ def get_puuid(name, tag):
         player_info = resp.json()
         puuid = player_info['puuid']
     except KeyError:
-        print("Wrong summoner name or tag")
+        print("Wrong summoner name, tag or api key")
         main()
     else:
         return puuid
 
+#2 Fetch id from puuid
 def get_id(puuid):
     api_url2 = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/" + puuid
     api_url2 = api_url2 + "?api_key=" + api_key
@@ -82,7 +87,7 @@ def player_ranked_stats(player_id):
     playerstats = resp3.json()
     return playerstats
 
-#4 gets the last 10 matches played
+#4 Gets the last 10 matches played
 def get_player_last_matches(player_puuid):
     api_url4 = "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/"
     api_url4 = api_url4 + player_puuid + "/ids?start=0&count=10&" +"api_key=" + api_key
@@ -99,7 +104,7 @@ def match_details(lastmatches,playerpuuid):
     n = matchdetails["metadata"]["participants"].index(playerpuuid)
     return matchdetails["info"]["participants"][n]
 
-#5 Prints the player stats
+#6 Prints the player stats
 def print_player_stats(playerstats):
     if playerstats == []:
         print ("The player has yet to complete his promomoton games")
@@ -112,12 +117,12 @@ def print_player_stats(playerstats):
         print("Wins: " + str(list["wins"]))
         print("Losses: " + str(list["losses"]))
 
-#6 Prints the match history
+#7 Prints the match history
 def print_match_history(lastmatches,puuid):
     matchhistory = []
     won = 0
     loss = 0
-    for i in range(5):
+    for i in range(10): #range(n) - "n" is the number of matches you want to display
         matchdetails = match_details(lastmatches[i], puuid)
 
         if matchdetails['win'] == False:
